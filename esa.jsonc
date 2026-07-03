@@ -1,0 +1,7 @@
+{
+  "assetsDir": "public",
+  "outputDir": "public",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "nodeVersion": "20"
+}

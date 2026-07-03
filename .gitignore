@@ -1,0 +1,37 @@
+# Hexo
+node_modules/
+public/
+db.json
+.deploy_git/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Project backup
+hvac-hexo.zip
+*.zip
+
+# Qoder
+.qoder/repowiki/
+
+# Halo 备份分析工作目录（迁移期临时产物）
+.halo-backup-tmp/
+
+# Git 备份（重置历史时临时产生）
+.git.backup/
+.git.backup
+
+# ============================================================
+# 临时（P0 迁移期）：设计文档与脚手架（属于 cimugarage-blog，不入 hvac-lab）
+# ============================================================
+/BLOG_MIGRATION_DESIGN.md
+/blog-scaffold/
+/cimu-kb-extract/
+/themes-cimu-kb-backup/
+# v0.5 blog_workflow.md 是为 cimugarage-blog 设计的，不属于 hvac-lab
+/.trae/rules/blog_workflow.md

@@ -1,0 +1,100 @@
+knowledge_bases:
+  - id: bas
+    name: 建筑自控
+    emoji: 🏗️
+    overview:
+      title: 建筑自控总览
+      emoji: 📖
+      path: /kb/
+    sections:
+      - name: 感知与执行层
+        collapsed: false
+        articles:
+          - title: 暖通传感器
+            emoji: 🌡️
+            path: /kb/sensors.html
+          - title: 暖通常用执行器
+            emoji: ⚙️
+            path: /kb/actuators.html
+      - name: 控制与算法层
+        collapsed: false
+        articles:
+          - title: 控制回路
+            emoji: 🔄
+            path: /kb/control-loop.html
+          - title: 控制算法
+            emoji: 🧠
+            path: /kb/algorithms.html
+      - name: 通信协议层
+        collapsed: false
+        articles:
+          - title: MODBUS通信协议
+            emoji: 🔌
+            path: /kb/modbus.html
+  - id: hc
+    name: 冷热源
+    emoji: 🔥
+    overview:
+      title: 冷热源总览
+      emoji: 📖
+      path: /kb/hc/
+    sections:
+      - name: 循环与工质层
+        collapsed: false
+        articles:
+          - title: 制冷循环基础
+            emoji: ❄️
+            path: /kb/refrigeration-cycle.html
+          - title: 制冷剂与工质
+            emoji: 💧
+            path: /kb/refrigerants.html
+      - name: 设备与系统层
+        collapsed: false
+        articles:
+          - title: 制冷设备
+            emoji: ⚙️
+            path: /kb/refrigeration-equipment.html
+          - title: 制冷与热泵系统
+            emoji: 🔄
+            path: /kb/refrigeration-systems.html
+      - name: 热源设备层
+        collapsed: false
+        articles:
+          - title: 锅炉设备
+            emoji: 🔥
+            path: /kb/boilers.html
+  - id: hvac
+    name: 暖通空调
+    emoji: 🌬️
+    overview:
+      title: 暖通空调总览
+      emoji: 📖
+      path: /kb/hvac/
+    sections:
+      - name: 基础理论
+        collapsed: false
+        articles:
+          - title: 绪论
+            emoji: 📘
+            path: /kb/hvac-intro.html
+          - title: 热湿负荷
+            emoji: 🌡️
+            path: /kb/hvac-load.html
+      - name: 供暖与空调
+        collapsed: false
+        articles:
+          - title: 供暖系统
+            emoji: 🔥
+            path: /kb/hvac-heating.html
+          - title: 空气调节
+            emoji: ❄️
+            path: /kb/hvac-ac.html
+      - name: 气流与防排烟
+        collapsed: false
+        articles:
+          - title: 气流组织
+            emoji: 💨
+            path: /kb/hvac-air-distribution.html
+          - title: 防排烟
+            emoji: 🚨
+            path: /kb/hvac-smoke-control.html

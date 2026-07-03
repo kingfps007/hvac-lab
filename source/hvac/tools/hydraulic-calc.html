@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>不等温降法水力计算 | 此木暖通车间</title>
+<meta name="description" content="基于Darcy-Weisbach公式与Colebrook方程的不等温降法水力计算工具">
+<!-- v4.4.8.3 缓存控制：HTML 1小时，浏览器硬刷新可立即看到推送内容；ESA Meta 优先级低于 HTTP 头，兜底用 -->
+<meta http-equiv="Cache-Control" content="public, max-age=3600">
+<meta http-equiv="Expires" content="3600">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+/* ====== 工具页面专用CSS ====== */
+html, body { max-width: 100vw; overflow-x: hidden; margin: 0; padding: 0; }
+body { padding-top: 44px; }
+.tools-fullscreen { font-family: 'Tinos','Times New Roman','宋体','SimSun',serif; background: #F8F4F0; color: #1C1C1C; line-height: 1.75; font-size: 18px; min-height: 70vh; }
+.tools-fullscreen .container { max-width: 1200px; margin: 0 auto; padding: 20px 25px; }
+.tools-fullscreen h1 { text-align: left; color: #3D2820; margin-bottom: 20px; font-size: 30px; border-bottom: 2px solid #B05A32; padding-bottom: 10px; }
+.tools-fullscreen h2 {
+  color: #3D2820; font-size: 24px; margin: 24px 0 10px;
+  padding-left: 8px; border-left: 3px solid #B05A32;
+}
+.tools-fullscreen h3 { color: #6B5545; font-size: 20px; margin: 18px 0 8px; }
+.tools-fullscreen .card {
+  background: #fff; border: 1px solid #D5C5B5; border-radius: 3px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06); padding: 25px; margin-bottom: 25px;
+  font-family: inherit;
+}
+.tools-fullscreen .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; align-items: flex-end; }
+.tools-fullscreen .form-group { display: flex; flex-direction: column; min-width: 140px; flex: 1; }
+.tools-fullscreen .form-group label { font-size: 15px; color: #6B5545; margin-bottom: 4px; font-weight: 600; }
+.tools-fullscreen .form-group input, .tools-fullscreen .form-group select {
+  padding: 9px 12px; border: 1.5px solid #D5C5B5; border-radius: 3px;
+  font-size: 16px; transition: border-color 0.2s; font-family: inherit; background: #fff;
+}
+.tools-fullscreen .form-group input:focus, .tools-fullscreen .form-group select:focus {
+  outline: none; border-color: #B05A32; box-shadow: 0 0 0 3px rgba(197,107,62,0.12);
+}
+.tools-fullscreen .btn {
+  padding: 10px 20px; border: none; border-radius: 3px; font-size: 16px;
+  cursor: pointer; font-weight: 600; transition: all 0.2s; font-family: inherit;
+}
+.tools-fullscreen .btn-primary { background: #B05A32; color: #fff; }
+.tools-fullscreen .btn-primary:hover { background: #8B3E1F; }
+.tools-fullscreen .btn-success { background: #7A8A4E; color: #fff; }
+.tools-fullscreen .btn-success:hover { background: #5E6A3A; }
+.tools-fullscreen .btn-danger { background: #A04038; color: #fff; }
+.tools-fullscreen .btn-danger:hover { background: #8B3025; }
+.tools-fullscreen .btn-outline { background: #fff; color: #B05A32; border: 1.5px solid #B05A32; }
+.tools-fullscreen .btn-outline:hover { background: #FAF2EB; }
+.tools-fullscreen .btn-sm { padding: 5px 12px; font-size: 14px; }
+.tools-fullscreen .section-table {
+  width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 17px;
+}
+.tools-fullscreen .section-table th, .tools-fullscreen .section-table td {
+  padding: 8px 12px; text-align: center; border: 1px solid #D5C5B5;
+}
+.tools-fullscreen .section-table th { background: #FAF2EB; font-weight: 600; color: #3D2820; font-size: 15px; white-space: nowrap; }
+.tools-fullscreen .section-table tr:nth-child(even) { background: #F8F4F0; }
+.tools-fullscreen .section-table td { white-space: nowrap; }
+.tools-fullscreen .section-table input {
+  width: 80px; padding: 6px; border: 1px solid #D5C5B5; border-radius: 3px;
+  text-align: center; font-family: inherit; font-size: 15px;
+}
+.tools-fullscreen .section-table input:focus { outline: none; border-color: #B05A32; }
+.tools-fullscreen .result-table {
+  width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 17px;
+}
+.tools-fullscreen .result-table th, .tools-fullscreen .result-table td {
+  padding: 8px 12px; text-align: center; border: 1px solid #D5C5B5; white-space: nowrap;
+}
+.tools-fullscreen .result-table th { background: #3D2820; color: #fff; font-weight: 600; font-size: 15px; }
+.tools-fullscreen .result-table tr:nth-child(even) { background: #F8F4F0; }
+.tools-fullscreen .result-table tr:hover { background: #FAF2EB; }
+.tools-fullscreen .highlight { background: #FAF0E0 !important; font-weight: 600; }
+.tools-fullscreen .summary-box { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
+.tools-fullscreen .summary-item {
+  flex: 1; min-width: 180px; background: #FAF2EB; padding: 15px;
+  border-radius: 3px; text-align: center; border: 1px solid #D5C5B5;
+  font-family: inherit;
+}
+.tools-fullscreen .summary-item .value { font-size: 24px; font-weight: 700; color: #B05A32; }
+.tools-fullscreen .summary-item .label { font-size: 15px; color: #6B5545; margin-top: 4px; }
+.tools-fullscreen .pipe-select-table {
+  width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 15px;
+}
+.tools-fullscreen .pipe-select-table th, .tools-fullscreen .pipe-select-table td {
+  padding: 8px; text-align: center; border: 1px solid #D5C5B5;
+}
+.tools-fullscreen .pipe-select-table th { background: #FAF2EB; font-weight: 600; color: #3D2820; }
+.tools-fullscreen .pipe-select-table tr:hover { background: #FAF2EB; cursor: pointer; }
+.tools-fullscreen .pipe-select-table tr.selected { background: #F0DDC8; font-weight: 600; }
+.tools-fullscreen .actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.tools-fullscreen .note {
+  background: #FAF2EB; border-left: 4px solid #B05A32; padding: 12px 16px;
+  margin-top: 15px; font-size: 15px; color: #3D2820; border-radius: 0 3px 3px 0; font-family: inherit;
+}
+.tools-fullscreen .error {
+  background: #FDF2F2; border-left: 4px solid #A04038; padding: 12px 16px;
+  margin-top: 15px; font-size: 15px; color: #A04038; border-radius: 0 3px 3px 0; font-family: inherit;
+}
+.tools-fullscreen .theory-box { margin-top: 8px; font-family: inherit; }
+.tools-fullscreen .theory-box p { text-indent: 2em; margin: 6px 0; font-family: inherit; }
+.tools-fullscreen .theory-box ol, .tools-fullscreen .theory-box ul { padding-left: 2em; margin: 8px 0; font-family: inherit; }
+.tools-fullscreen .theory-box li { margin: 4px 0; font-family: inherit; font-size: inherit; color: inherit; }
+.tools-fullscreen .theory-box li::marker { font-family: inherit; }
+.tools-fullscreen .theory-box strong, .tools-fullscreen .note strong, .tools-fullscreen .note li { font-family: inherit; font-size: inherit; color: inherit; }
+.tools-fullscreen .theory-box .formula {
+  text-align: center; margin: 12px 0; font-size: 18px; font-weight: 600; color: #3D2820; text-indent: 0;
+}
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .tools-fullscreen .container { padding: 11px; }
+  .tools-fullscreen h1 { font-size: 23px; }
+  .tools-fullscreen h2 { font-size: 20px; }
+  .tools-fullscreen h3 { font-size: 17px; }
+  .tools-fullscreen .card { padding: 14px; }
+  .tools-fullscreen .card > div[style*="overflow-x:auto"] { max-width: 100%; -webkit-overflow-scrolling: touch; }
+  .tools-fullscreen .section-table, .tools-fullscreen .result-table { font-size: 14px; width: auto; min-width: max-content; }
+  .tools-fullscreen .section-table th, .tools-fullscreen .result-table th { font-size: 12px; }
+  .tools-fullscreen .form-row { gap: 8px; }
+  .tools-fullscreen .form-group { min-width: 80px; }
+  .tools-fullscreen .summary-item { min-width: 120px; }
+  .tools-fullscreen .btn { padding: 8px 14px; font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ====== 导航栏 ====== -->
+<nav class="navbar">
+  <a href="/index.html" class="logo">此木暖通车间</a>
+</nav>
+
+<!-- ====== 工具主体内容 ====== -->
+<div class="tools-fullscreen">
+<div class="container">
+  <h1>不等温降法 - 热水供暖系统水力计算</h1>
+
+  <!-- 基础参数 -->
+  <div class="card">
+    <h2>一、系统基础参数</h2>
+    <div class="form-row">
+      <div class="form-group"><label>供水温度 Tg (°C)</label><input type="number" id="tg" value="95" step="0.1"></div>
+      <div class="form-group"><label>设计回水温度 Th (°C)</label><input type="number" id="th" value="70" step="0.1"></div>
+      <div class="form-group"><label>系统总热负荷 (kW)</label><input type="number" id="totalLoad" value="0" step="0.01" readonly></div>
+      <div class="form-group"><label>管壁粗糙度 K (mm)</label><input type="number" id="roughness" value="0.2" step="0.01"></div>
+      <div class="form-group"><label>热水密度 ρ (kg/m³)</label><input type="number" id="density" value="977.8" step="0.1"></div>
+    </div>
+    <div class="note"><strong>说明：</strong>不等温降法考虑各散热器的实际温降不同，适用于单管或双管热水供暖系统的水力计算。水的比热容取 4.187 kJ/(kg·°C)。</div>
+  </div>
+
+  <!-- 场景说明 -->
+  <div class="card">
+    <h2>二、系统场景选择</h2>
+    <div class="form-row">
+      <div class="form-group" style="min-width:240px;flex:2;">
+        <label>系统场景</label>
+        <select id="scenarioSelect" onchange="applyScenario()">
+          <option value="single-pipe-series">单管串联系统（同程式） — 流量沿程累加、温降累加</option>
+          <option value="double-pipe-return-reverse">双管异程式 — 各支路独立、阻力不等</option>
+          <option value="double-pipe-return-direct">双管同程式 — 各支路独立、阻力平衡好</option>
+          <option value="single-pipe-bypass">单管跨越式 — 支路分流、温降可调</option>
+          <option value="vertical-mismatch-6floor">高层双管失调（6 层） — 偏导数对比分析专用</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:3;align-self:center;">
+        <div style="font-size:14px;color:#6B5545;line-height:1.6;">
+          <strong>当前场景：</strong><span id="scenarioDesc">单管串联，流量依次通过各散热器</span>
+        </div>
+      </div>
+    </div>
+    <div class="note"><strong>使用提示：</strong>选择场景后会自动填入示例数据。管段 N 编号顺序对应物理流向（供水→回水）。<strong>单管串联</strong>：总流量=各支路流量之和（需用"流量沿程累加法"）；<strong>双管系统</strong>：各支路独立并联、阻力平衡即可（用"不等温降法"直接计算）；<strong>同程 vs 异程</strong>：仅影响远端阻力差异，不改变计算方法。</div>
+  </div>
+
+  <!-- 管段输入 -->
+  <div class="card">
+    <h2>三、散热器管段参数</h2>
+    <div style="margin-bottom:15px;">
+      <button class="btn btn-primary" onclick="addSection()">+ 添加散热器管段</button>
+      <button class="btn btn-outline" onclick="addMultipleSections()">批量添加</button>
+      <button class="btn btn-outline" onclick="loadScenarioData()">载入当前场景示例</button>
+      <button class="btn btn-danger" onclick="clearAllSections()" style="margin-left:10px;">清空全部</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="section-table" id="sectionTable">
+        <thead><tr><th>序号</th><th>管段名称</th><th>热负荷 Q (W)</th><th>管段长度 L (m)</th><th>局部阻力系数 Σξ</th><th>允许比摩阻 R (Pa/m)</th><th>操作</th></tr></thead>
+        <tbody id="sectionBody"></tbody>
+      </table>
+    </div>
+    <div id="sectionEmpty" style="text-align:center;padding:30px;color:#a0aec0;">暂无管段数据，请点击"添加散热器管段"或"载入当前场景示例"</div>
+  </div>
+
+  <!-- 管径参考表 -->
+  <div class="card" id="pipeRefCard">
+    <h2>四、常用管径水力参数参考</h2>
+    <div style="overflow-x:auto;">
+      <table class="pipe-select-table" id="pipeRefTable">
+        <thead><tr><th>公称直径 DN</th><th>外径×壁厚 (mm)</th><th>内径 d (mm)</th><th>参考流量范围 (kg/h)</th><th>参考比摩阻范围 (Pa/m)</th></tr></thead>
+        <tbody id="pipeRefBody"></tbody>
+      </table>
+    </div>
+    <div class="note">点击行可快速选取管径进行计算。管径数据参考《实用供热空调设计手册》。本表默认展开，方便计算时随时对照。</div>
+  </div>
+
+  <!-- 计算结果 -->
+  <div class="card">
+    <h2>五、计算结果</h2>
+    <div class="actions">
+      <button class="btn btn-success" onclick="calculate()">开始计算</button>
+      <button class="btn btn-outline" onclick="exportResult()">导出结果</button>
+      <button class="btn btn-outline" onclick="resetAll()">重置全部</button>
+    </div>
+    <div id="resultArea" style="display:none;">
+      <div class="summary-box" id="summaryBox"></div>
+      <h3 style="margin-top:20px;">详细计算结果</h3>
+      <div style="overflow-x:auto;">
+        <table class="result-table" id="resultTable">
+          <thead><tr><th>管段</th><th>热负荷 (W)</th><th>流量 G (kg/h)</th><th>温降 ΔT (°C)</th><th>选管径 DN</th><th>内径 d (mm)</th><th>流速 v (m/s)</th><th>比摩阻 R (Pa/m)</th><th>沿程阻力 ΔPm (Pa)</th><th>局部阻力 ΔPj (Pa)</th><th>总阻力 ΔP (Pa)</th></tr></thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+      </div>
+      <div id="systemSummary" style="margin-top:20px;"></div>
+      <h3 style="margin-top:20px;">阀门选型与调节指导</h3>
+      <div id="valveGuidance"></div>
+    </div>
+  </div>
+
+  <!-- 计算原理 -->
+  <div class="card">
+    <h2>五、计算原理</h2>
+    <div class="theory-box">
+      <h3>5.1 不等温降法的核心思想</h3>
+      <p>传统等温降法假设系统中各散热器的供回水温差相同（例如均为 95°C/70°C，ΔT=25°C），据此统一计算流量并选管径。但在实际供暖系统中，由于各散热器的热负荷不同、管段长度不同、水温沿程变化，各散热器的实际温降并不相等。</p>
+      <p>不等温降法正是考虑到这一物理事实：<strong>各散热器的温降由该管段的热负荷与实际流量的比值决定</strong>，即：</p>
+      <div class="formula">ΔT<sub>i</sub> = Q<sub>i</sub> / (c<sub>p</sub> · G<sub>i</sub>)</div>
+      <p>其中 Q<sub>i</sub> 为第 i 管段的热负荷（W），c<sub>p</sub> 为水的比热容（4.187 kJ/(kg·°C)），G<sub>i</sub> 为该管段的质量流量（kg/h）。</p>
+
+      <h3>5.2 水力计算基本方程</h3>
+      <p><strong>（1）达西-魏斯巴赫公式（Darcy-Weisbach）——比摩阻计算</strong></p>
+      <div class="formula">R = λ · (ρ · v²) / (2 · d)</div>
+      <p>其中 R 为比摩阻（Pa/m），λ 为摩擦阻力系数，ρ 为流体密度（kg/m³），v 为流速（m/s），d 为管道内径（m）。</p>
+      <p><strong>（2）柯尔布鲁克公式（Colebrook）——摩擦系数 λ 迭代求解</strong></p>
+      <div class="formula">1/√λ = -2 · log<sub>10</sub>[ K/(3.71·d) + 2.51/(Re·√λ) ]</div>
+      <p>其中 K 为管壁绝对粗糙度（mm），Re 为雷诺数。本工具采用 15 次迭代求解至收敛。</p>
+      <p><strong>（3）局部阻力计算</strong></p>
+      <div class="formula">ΔP<sub>j</sub> = Σξ · (ρ · v² / 2)</div>
+      <p>其中 Σξ 为管段局部阻力系数之和（包括弯头、三通、阀门等）。</p>
+
+      <h3>5.3 管径迭代选择算法</h3>
+      <p>本工具采用"允许比摩阻约束 + 流量范围匹配"的双重准则进行管径选择：</p>
+      <p>1. 以设计供回水温差估算初始流量 G<sub>est</sub></p>
+      <p>2. 从 DN15~DN150 管径数据库中，选择流量在管道参考范围内且比摩阻最接近允许值的管径</p>
+      <p>3. 计算实际比摩阻，若超出允许范围（＞1.5倍或＜0.2倍），自动调整至相邻档位管径</p>
+      <p>4. 基于收敛后的管径反算实际流量和实际温降，最多迭代 20 次</p>
+
+      <h3>5.4 串联系统调整</h3>
+      <p>对于单管串联（或同程式）系统，水温沿流向逐段降低。本工具在初步计算后执行串联调整：每段散热器的实际流量由其热负荷和实际温降决定，后段供水温度 = 前段供水温度 - 前段温降，最终输出调整后的各段水力参数。</p>
+    </div>
+  </div>
+
+  <!-- 注意事项 -->
+  <div class="card">
+    <h2>七、注意事项</h2>
+    <div class="theory-box">
+      <p><strong>1. 适用范围：</strong>本工具适用于热水供暖系统（供水温度 ≤ 150°C）的水力计算，包括单管串联、双管同程式及异程式系统。</p>
+      <p><strong>2. 粗糙度取值：</strong>管壁粗糙度 K 对计算结果影响显著。新无缝钢管取 K=0.05~0.1mm，轻度腐蚀钢管取 K=0.2~0.3mm，严重腐蚀钢管取 K=0.5~1.0mm。默认值 0.2mm 适用于轻度腐蚀的普通钢管。</p>
+      <p><strong>3. 局部阻力系数：</strong>Σξ 为管段内所有局部构件的阻力系数之和。常见参考值：90°弯头 ξ≈0.5~1.0，三通（分流）ξ≈1.5~3.0，截止阀 ξ≈4.0~10.0，闸阀（全开）ξ≈0.1~0.3。建议查阅《实用供热空调设计手册》获取准确数值。</p>
+      <p><strong>4. 允许比摩阻：</strong>建议主干管 R≤60 Pa/m，支管 R≤120 Pa/m。默认值 25 Pa/m 适用于一般供暖系统。</p>
+      <p><strong>5. 流速限制：</strong>供暖管道推荐流速 0.2~1.5 m/s（DN15~DN50），大口径管道可放宽。流速过高会导致噪声和振动，流速过低则排气困难。</p>
+      <p><strong>6. 物性参数：</strong>默认密度 977.8 kg/m³ 对应约 80°C 的热水，运动粘度取 0.365×10⁻⁶ m²/s（约 80°C）。若供水温度显著偏离 80°C，建议同步调整密度值。</p>
+      <p><strong>7. 迭代收敛：</strong>极端工况下（极低流量 + 极小管径，或高温差 + 高比摩阻），迭代可能不收敛。此时应检查输入参数是否在合理范围内。</p>
+      <p><strong>8. 结果验证：</strong>计算完成后，建议检查各管段的流速是否在推荐范围内，比摩阻是否超过允许值。若管径选型偏大/偏小，可手动调整允许比摩阻后重新计算。</p>
+      <p><strong>9. 参考文献：</strong>《实用供热空调设计手册》（第二版）· 陆耀庆主编 · 中国建筑工业出版社</p>
+    </div>
+  </div>
+
+  <!-- 循环方式对比分析 -->
+  <div class="card">
+    <h2>八、机械循环 vs 重力循环：偏导数量化对比</h2>
+    <div class="theory-box">
+      <p><strong>📌 本模块独立于上方管段水力计算</strong>。§八 是一个<strong>独立的敏感性分析工具</strong>，用来量化回答"机械循环 vs 重力循环"在质调节下的失调度差异。详见 KB 文章 <a href="/kb/hvac-heating.html" style="color:#B05A32;text-decoration:underline;">《供暖系统》§2.4 偏导数对比</a> 的完整理论推导。</p>
+      <p><strong>💡 与上方"场景选择器"的区别：</strong>§二场景选择器影响上方 §三 管段数据（流量、阻力、管径）的载入；§八只依赖自身 6 个输入参数（层数/层高/水泵压头等），可直接使用，无须先点"开始计算"。</p>
+
+      <h3>8.1 模型参数</h3>
+      <div class="form-row">
+        <div class="form-group"><label>层数 N</label><input type="number" id="cmpFloors" value="6" min="2" max="20" onchange="runCirculationCompare()"></div>
+        <div class="form-group"><label>层高 h (m)</label><input type="number" id="cmpFloorH" value="3" min="2.5" max="5" step="0.1" onchange="runCirculationCompare()"></div>
+        <div class="form-group"><label>机械循环水泵压头 H<sub>p</sub> (Pa)</label><input type="number" id="cmpHp" value="10000" min="0" step="100" onchange="runCirculationCompare()"></div>
+        <div class="form-group"><label>支路阻力系数 S (Pa/(kg/h)²)</label><input type="number" id="cmpS" value="0.05" min="0.001" step="0.01" onchange="runCirculationCompare()"></div>
+        <div class="form-group"><label>水温差 ΔT (°C)</label><input type="number" id="cmpDT" value="25" min="5" step="1" onchange="runCirculationCompare()"></div>
+        <div class="form-group"><label>密度差 Δρ (kg/m³)</label><input type="number" id="cmpDrho" value="6" min="0.1" step="0.1" onchange="runCirculationCompare()"></div>
+      </div>
+      <div class="note"><strong>参数说明：</strong>密度差 Δρ = ρ<sub>avg</sub> - ρ<sub>i</sub>，由供回水温度决定。典型值：95°C/70°C 供水 Δρ≈6 kg/m³；85°C/60°C 供水 Δρ≈4 kg/m³。层高 × 层数 = 最高散热器相对热源高差。</div>
+
+      <h3>8.2 各支路流量对比</h3>
+      <div style="overflow-x:auto;">
+        <table class="result-table" id="cmpFlowTable">
+          <thead><tr><th>楼层</th><th>高差 h (m)</th><th>自然压头 H<sub>g</sub> (Pa)</th><th>设计流量 G (kg/h)</th><th>机械循环 G<sub>M</sub></th><th>重力循环 G<sub>G</sub></th><th>机械失调度 σ<sub>M</sub> (%)</th><th>重力失调度 σ<sub>G</sub> (%)</th></tr></thead>
+          <tbody id="cmpFlowBody"></tbody>
+        </table>
+      </div>
+
+      <h3>8.3 系统整体失调度 Σ</h3>
+      <div class="summary-box" id="cmpSummary"></div>
+
+      <h3>8.4 偏导数灵敏度</h3>
+      <div style="overflow-x:auto;">
+        <table class="result-table" id="cmpDerivTable">
+          <thead><tr><th>楼层</th><th>∂G/∂H<sub>p</sub> (机械)</th><th>∂G/∂H<sub>g</sub> (重力)</th><th>∂σ/∂Q (机械, ×10⁻⁴)</th><th>∂σ/∂Q (重力, ×10⁻⁴)</th></tr></thead>
+          <tbody id="cmpDerivBody"></tbody>
+        </table>
+      </div>
+      <div class="note"><strong>解读：</strong>∂G/∂H<sub>p</sub> 越大 → 流量对水泵压头变化越敏感；∂σ/∂Q 越大 → 流量对热负荷变化越敏感 → 越容易失调。比较机械和重力两列，可量化看到机械循环的优势（数量级小 1-2 个）。</div>
+
+      <h3>8.5 结论</h3>
+      <div id="cmpConclusion"></div>
+    </div>
+  </div>
+</div>
+</div><!-- /tools-fullscreen -->
+
+<!-- ====== 页脚 ====== -->
+<footer class="footer">
+  <p class="footer-links">
+    <a href="/about/">📖 关于</a>
+    <a href="https://cimugarage.cn" target="_blank">🏠 此木的车间</a>
+  </p>
+  <p>此木暖通车间 · CIMU HVAC LAB</p>
+</footer>
+
+<!-- ====== 水力计算核心JS ====== -->
+<script>
+const PIPE_DATABASE = [
+  { dn: 15, od: '21.25×2.75', id: 15.75, flowMin: 30, flowMax: 200, rMin: 5, rMax: 60 },
+  { dn: 20, od: '26.75×2.75', id: 21.25, flowMin: 80, flowMax: 400, rMin: 5, rMax: 50 },
+  { dn: 25, od: '33.5×3.25',  id: 27.0,  flowMin: 150, flowMax: 800, rMin: 5, rMax: 45 },
+  { dn: 32, od: '42.25×3.25', id: 35.75, flowMin: 300, flowMax: 1500, rMin: 5, rMax: 40 },
+  { dn: 40, od: '48×3.5',     id: 41.0,  flowMin: 500, flowMax: 2500, rMin: 5, rMax: 35 },
+  { dn: 50, od: '60×3.5',     id: 53.0,  flowMin: 800, flowMax: 4500, rMin: 5, rMax: 30 },
+  { dn: 65, od: '75.5×3.75',  id: 68.0,  flowMin: 1500, flowMax: 8000, rMin: 5, rMax: 28 },
+  { dn: 80, od: '88.5×4',     id: 80.5,  flowMin: 2500, flowMax: 12000, rMin: 5, rMax: 25 },
+  { dn: 100, od: '114×4',     id: 106.0, flowMin: 5000, flowMax: 25000, rMin: 5, rMax: 22 },
+  { dn: 125, od: '140×4.5',   id: 131.0, flowMin: 8000, flowMax: 40000, rMin: 5, rMax: 18 },
+  { dn: 150, od: '165×4.5',   id: 156.0, flowMin: 12000, flowMax: 60000, rMin: 5, rMax: 15 }
+];
+const CP = 4.187, G_ACC = 9.81;
+var sectionCount = 0, selectedPipeIndex = {};
+
+function init() { renderPipeRefTable(); addSampleData(); applyScenario(); renderCirculationCompare(); }
+function addSampleData() {
+  [{name:'散热器A-卧室',load:1800,length:8.5,xi:3.5,r:25},{name:'散热器B-客厅',load:2500,length:12.0,xi:4.0,r:25},{name:'散热器C-书房',load:1200,length:6.0,xi:3.0,r:25},{name:'散热器D-餐厅',load:2000,length:10.0,xi:3.5,r:25},{name:'散热器E-厨房',load:1500,length:7.0,xi:2.5,r:25}].forEach(function(s){ sectionCount++; selectedPipeIndex[sectionCount]=-1; addSectionRow(sectionCount,s.name,s.load,s.length,s.xi,s.r); });
+  updateTotalLoad(); toggleEmpty();
+}
+
+// ====== 场景选择器 ======
+var SCENARIOS = {
+  'single-pipe-series': {
+    desc: '单管串联（同程式） — 总流量依次通过各散热器，温降累加',
+    sections: [
+      {name:'1F-起居室',load:2200,length:8.0,xi:2.5,r:60},
+      {name:'2F-卧室',load:1500,length:8.0,xi:2.5,r:60},
+      {name:'3F-书房',load:1200,length:8.0,xi:2.5,r:60},
+      {name:'4F-次卧',load:1300,length:8.0,xi:2.5,r:60},
+      {name:'5F-主卧',load:1800,length:8.0,xi:2.5,r:60}
+    ]
+  },
+  'double-pipe-return-reverse': {
+    desc: '双管异程式 — 各支路并联，供水顺序与回水顺序相反',
+    sections: [
+      {name:'远端立管-1F',load:1500,length:18.0,xi:5.0,r:80},
+      {name:'远端立管-3F',load:1200,length:14.0,xi:4.5,r:80},
+      {name:'远端立管-5F',load:1000,length:10.0,xi:4.0,r:80},
+      {name:'近端立管-5F',load:1000,length:4.0,xi:3.5,r:80},
+      {name:'近端立管-3F',load:1200,length:3.0,xi:3.5,r:80},
+      {name:'近端立管-1F',load:1500,length:2.0,xi:3.0,r:80}
+    ]
+  },
+  'double-pipe-return-direct': {
+    desc: '双管同程式 — 各支路并联，供回水路径等长，阻力平衡好',
+    sections: [
+      {name:'1F',load:1500,length:10.0,xi:4.0,r:60},
+      {name:'2F',load:1300,length:10.0,xi:4.0,r:60},
+      {name:'3F',load:1200,length:10.0,xi:4.0,r:60},
+      {name:'4F',load:1200,length:10.0,xi:4.0,r:60},
+      {name:'5F',load:1000,length:10.0,xi:4.0,r:60}
+    ]
+  },
+  'single-pipe-bypass': {
+    desc: '单管跨越式 — 部分流量跨越散热器（用于户内调节）',
+    sections: [
+      {name:'跨越管前-1F',load:1800,length:5.0,xi:2.0,r:80},
+      {name:'1F-散热器',load:1200,length:2.0,xi:8.0,r:60},
+      {name:'跨越管-2F',load:1500,length:4.0,xi:3.0,r:80},
+      {name:'2F-散热器',load:1000,length:2.0,xi:8.0,r:60},
+      {name:'3F-散热器',load:900,length:2.0,xi:8.0,r:60}
+    ]
+  },
+  'vertical-mismatch-6floor': {
+    desc: '高层双管失调（6 层） — 底层到顶层散热器，用于偏导数对比分析',
+    sections: [
+      {name:'1F-底层',load:1200,length:8.0,xi:3.0,r:60},
+      {name:'2F',load:1200,length:8.0,xi:3.0,r:60},
+      {name:'3F',load:1100,length:8.0,xi:3.0,r:60},
+      {name:'4F',load:1100,length:8.0,xi:3.0,r:60},
+      {name:'5F',load:1000,length:8.0,xi:3.0,r:60},
+      {name:'6F-顶层',load:1000,length:8.0,xi:3.0,r:60}
+    ]
+  }
+};
+function applyScenario() {
+  var key = document.getElementById('scenarioSelect').value;
+  var sc = SCENARIOS[key];
+  document.getElementById('scenarioDesc').textContent = sc.desc;
+}
+function loadScenarioData() {
+  var key = document.getElementById('scenarioSelect').value;
+  var sc = SCENARIOS[key];
+  document.getElementById('sectionBody').innerHTML = '';
+  sectionCount = 0; selectedPipeIndex = {};
+  sc.sections.forEach(function(s){
+    sectionCount++;
+    selectedPipeIndex[sectionCount] = -1;
+    addSectionRow(sectionCount, s.name, s.load, s.length, s.xi, s.r);
+  });
+  updateTotalLoad(); toggleEmpty();
+}
+function loadScenarioDataWithConfirm() {
+  if (!confirm('将清空当前管段数据并载入当前场景的示例？')) return;
+  loadScenarioData();
+}
+function addSampleData() {
+  loadScenarioData();
+}
+function renderPipeRefTable() {
+  document.getElementById('pipeRefBody').innerHTML = PIPE_DATABASE.map(function(p,i){ return '<tr onclick="selectPipe('+i+')" id="pipeRow'+i+'"><td>DN'+p.dn+'</td><td>'+p.od+'</td><td>'+p.id+'</td><td>'+p.flowMin+' ~ '+p.flowMax+'</td><td>'+p.rMin+' ~ '+p.rMax+'</td></tr>'; }).join('');
+}
+function selectPipe(i) { document.querySelectorAll('#pipeRefTable tbody tr').forEach(function(r){ r.classList.remove('selected'); }); document.getElementById('pipeRow'+i).classList.add('selected'); }
+function addSection() { sectionCount++; selectedPipeIndex[sectionCount]=-1; addSectionRow(sectionCount,'管段'+sectionCount,'','','',25); toggleEmpty(); document.getElementById('pipeRefCard').style.display='block'; }
+function addMultipleSections() { var n=parseInt(prompt('请输入要添加的管段数量 (1-20)：','5')); if(isNaN(n)||n<1||n>20){alert('请输入1-20之间的数字');return;} for(var i=0;i<n;i++){sectionCount++;selectedPipeIndex[sectionCount]=-1;addSectionRow(sectionCount,'管段'+sectionCount,'','','',25);} toggleEmpty(); document.getElementById('pipeRefCard').style.display='block'; }
+function addSectionRow(id,name,load,length,xi,r) { var tr=document.createElement('tr'); tr.id='sectionRow'+id; tr.innerHTML='<td>'+id+'</td><td><input type="text" id="name_'+id+'" value="'+name+'" style="width:120px;"></td><td><input type="number" id="load_'+id+'" value="'+load+'" step="1" min="0" onchange="updateTotalLoad()"></td><td><input type="number" id="length_'+id+'" value="'+length+'" step="0.1" min="0"></td><td><input type="number" id="xi_'+id+'" value="'+xi+'" step="0.1" min="0"></td><td><input type="number" id="r_allow_'+id+'" value="'+r+'" step="0.1" min="0"></td><td><button class="btn btn-danger btn-sm" onclick="removeSection('+id+')">删除</button></td>'; document.getElementById('sectionBody').appendChild(tr); }
+function removeSection(id) { var tr=document.getElementById('sectionRow'+id); if(tr)tr.remove(); delete selectedPipeIndex[id]; updateTotalLoad(); toggleEmpty(); }
+function clearAllSections() { if(!confirm('确定要清空所有管段数据吗？'))return; document.getElementById('sectionBody').innerHTML=''; sectionCount=0; selectedPipeIndex={}; updateTotalLoad(); toggleEmpty(); document.getElementById('resultArea').style.display='none'; }
+function toggleEmpty() { document.getElementById('sectionEmpty').style.display = document.getElementById('sectionBody').children.length===0?'block':'none'; }
+function updateTotalLoad() { var t=0,rows=document.getElementById('sectionBody').children; for(var i=0;i<rows.length;i++){var id=rows[i].id.replace('sectionRow',''),inp=document.getElementById('load_'+id); if(inp&&inp.value)t+=parseFloat(inp.value)||0;} document.getElementById('totalLoad').value=t.toFixed(2); }
+function calcVelocity(flow,d,rho){if(d<=0)return 0; return (flow/rho)/3600/(Math.PI*Math.pow(d/1000,2)/4);}
+function calcFrictionLoss(flow,d,roughness,rho){if(d<=0||flow<=0)return 0; var v=calcVelocity(flow,d,rho); if(v<=0)return 0; var dia=d/1000,Re=v*dia/0.365e-6,lambda=0.02,k=roughness/1000; for(var i=0;i<15;i++){var term=k/(3.71*dia)+2.51/(Re*Math.sqrt(lambda)),nl=1/Math.pow(-2*Math.log10(term),2); if(Math.abs(nl-lambda)<1e-6)break; lambda=nl;} return lambda*(rho*v*v)/(2*dia);}
+function calcFlowByR(targetR,d,roughness,rho){if(d<=0||targetR<=0)return 50; var dia=d/1000,lo=10,hi=100000; for(var i=0;i<30;i++){var mid=(lo+hi)/2,v=calcVelocity(mid,d,rho),Re=v*dia/0.365e-6,lambda=0.02,k=roughness/1000; for(var j=0;j<10;j++){if(Re<=0)break; var term=k/(3.71*dia)+2.51/(Re*Math.sqrt(lambda));lambda=1/Math.pow(-2*Math.log10(term),2);} var R=lambda*(rho*v*v)/(2*dia); if(R<targetR)lo=mid;else hi=mid; if(Math.abs(hi-lo)<0.01)break;} return (lo+hi)/2;}
+function selectPipeByFlowAndR(flow,rAllow){var best=PIPE_DATABASE[0],bestS=Infinity; for(var i=0;i<PIPE_DATABASE.length;i++){var p=PIPE_DATABASE[i]; if(flow<p.flowMin*0.3||flow>p.flowMax*1.5)continue; var r=calcFrictionLoss(flow,p.id,0.2,977.8),s=Math.abs(r-rAllow); if(s<bestS){bestS=s;best=p;}} return best;}
+
+function calculate() {
+  var tg=parseFloat(document.getElementById('tg').value)||95,th=parseFloat(document.getElementById('th').value)||70,roughness=parseFloat(document.getElementById('roughness').value)||0.2,rho=parseFloat(document.getElementById('density').value)||977.8;
+  var rows=document.getElementById('sectionBody').children; if(rows.length===0){alert('请先添加管段数据！');return;}
+  var sections=[];
+  for(var ri=0;ri<rows.length;ri++){var id=rows[ri].id.replace('sectionRow',''),name=document.getElementById('name_'+id)?.value||('管段'+id),load=parseFloat(document.getElementById('load_'+id)?.value),length=parseFloat(document.getElementById('length_'+id)?.value),xi=parseFloat(document.getElementById('xi_'+id)?.value),rAllow=parseFloat(document.getElementById('r_allow_'+id)?.value)||25; if(isNaN(load)||load<=0){alert('管段"'+name+'"的热负荷无效');return;} if(isNaN(length)||length<=0){alert('管段"'+name+'"的长度无效');return;} if(isNaN(xi)||xi<0){alert('管段"'+name+'"的局部阻力系数无效');return;} sections.push({id:id,name:name,load:load,length:length,xi:xi,rAllow:rAllow});}
+  var totalLoad=sections.reduce(function(s,x){return s+x.load;},0); document.getElementById('totalLoad').value=totalLoad.toFixed(2);
+  var designDT=tg-th,totalFlow=(totalLoad*3600)/(CP*1000*designDT),results=[];
+  for(var si=0;si<sections.length;si++){var sec=sections[si],estFlow=(sec.load*3600)/(CP*1000*designDT),iterPipe=selectPipeByFlowAndR(estFlow,sec.rAllow),iterFlow=estFlow,iterDT=designDT;
+    for(var iter=0;iter<20;iter++){var calR=calcFrictionLoss(iterFlow,iterPipe.id,roughness,rho); if(calR>sec.rAllow*1.5&&iterPipe.dn<150){var ni=PIPE_DATABASE.findIndex(function(p){return p.dn>iterPipe.dn;}); if(ni>=0){iterPipe=PIPE_DATABASE[ni];continue;}} if(calR<sec.rAllow*0.2&&iterPipe.dn>15){var pi=PIPE_DATABASE.findIndex(function(p){return p.dn>=iterPipe.dn;})-1; if(pi>=0){iterPipe=PIPE_DATABASE[pi];continue;}} iterFlow=calcFlowByR(sec.rAllow,iterPipe.id,roughness,rho); iterDT=(sec.load*3600)/(CP*1000*iterFlow); if(Math.abs(iterDT-designDT)<0.01||iter>15)break;}
+    var fv=calcVelocity(iterFlow,iterPipe.id,rho),fR=calcFrictionLoss(iterFlow,iterPipe.id,roughness,rho),fL=fR*sec.length,lL=sec.xi*(fv*fv*rho/2);
+    results.push({id:sec.id,name:sec.name,load:sec.load,flow:iterFlow,dt:iterDT,dn:iterPipe.dn,innerDia:iterPipe.id,velocity:fv,r:fR,frictionLoss:fL,localLoss:lL,totalLoss:fL+lL,length:sec.length,xi:sec.xi});
+  }
+  var adj=[]; for(var ai=0;ai<results.length;ai++){var r=Object.assign({},results[ai]),af=(r.load*3600)/(CP*1000*r.dt),av=calcVelocity(af,r.innerDia,rho),aR=calcFrictionLoss(af,r.innerDia,roughness,rho); r.flow=af;r.velocity=av;r.r=aR;r.frictionLoss=aR*r.length;r.localLoss=r.xi*(av*av*rho/2);r.totalLoss=r.frictionLoss+r.localLoss; adj.push(r);}
+  displayResults(adj,totalLoad,totalFlow,designDT);
+}
+function displayResults(results,totalLoad,totalFlow,designDT) {
+  var tf=results.reduce(function(s,r){return s+r.frictionLoss;},0),tl=results.reduce(function(s,r){return s+r.localLoss;},0),tr=results.reduce(function(s,r){return s+r.totalLoss;},0);
+  document.getElementById('summaryBox').innerHTML='<div class="summary-item"><div class="value">'+totalLoad.toFixed(0)+'</div><div class="label">总热负荷 (W)</div></div><div class="summary-item"><div class="value">'+totalFlow.toFixed(1)+'</div><div class="label">设计总流量 (kg/h)</div></div><div class="summary-item"><div class="value">'+designDT.toFixed(1)+'</div><div class="label">设计温降 (°C)</div></div><div class="summary-item"><div class="value">'+tr.toFixed(1)+'</div><div class="label">系统总阻力 (Pa)</div></div><div class="summary-item"><div class="value">'+results.length+'</div><div class="label">管段数量</div></div>';
+  var rh=''; results.forEach(function(r){ rh+='<tr><td><strong>'+r.name+'</strong></td><td>'+r.load.toFixed(0)+'</td><td>'+r.flow.toFixed(1)+'</td><td class="highlight">'+r.dt.toFixed(2)+'</td><td><strong>DN'+r.dn+'</strong></td><td>'+r.innerDia.toFixed(1)+'</td><td>'+r.velocity.toFixed(3)+'</td><td>'+r.r.toFixed(2)+'</td><td>'+r.frictionLoss.toFixed(1)+'</td><td>'+r.localLoss.toFixed(1)+'</td><td><strong>'+r.totalLoss.toFixed(1)+'</strong></td></tr>'; });
+  document.getElementById('resultBody').innerHTML=rh;
+  var avgDT=results.reduce(function(s,r){return s+r.dt;},0)/results.length;
+  document.getElementById('systemSummary').innerHTML='<div class="note"><strong>系统分析：</strong><br>• 各散热器平均温降：<strong>'+avgDT.toFixed(2)+' °C</strong>（不等温降法的核心特征）<br>• 最大温降：<strong>'+Math.max.apply(null,results.map(function(r){return r.dt;})).toFixed(2)+' °C</strong> | 最小温降：<strong>'+Math.min.apply(null,results.map(function(r){return r.dt;})).toFixed(2)+' °C</strong><br>• 沿程阻力总计：<strong>'+tf.toFixed(1)+' Pa</strong>（占比 '+(tf/tr*100).toFixed(1)+'%）<br>• 局部阻力总计：<strong>'+tl.toFixed(1)+' Pa</strong>（占比 '+(tl/tr*100).toFixed(1)+'%）<br>• 最大流速管段：<strong>'+results.reduce(function(a,b){return a.velocity>b.velocity?a:b;}).name+'</strong>（'+Math.max.apply(null,results.map(function(r){return r.velocity;})).toFixed(3)+' m/s）</div>';
+  document.getElementById('resultArea').style.display='block'; document.getElementById('resultArea').scrollIntoView({behavior:'smooth',block:'start'});
+  renderValveGuidance(adj);
+}
+
+// ====== 阀门选型与调节指导 ======
+function renderValveGuidance(results) {
+  var el = document.getElementById('valveGuidance');
+  if (!el) { console.warn('valveGuidance div not found'); return; }
+  var html = '<div class="note"><strong>📋 阀门选型建议</strong><br>';
+  // 找最不利环路
+  var maxDP = results.reduce(function(a, b){ return a.totalLoss > b.totalLoss ? a : b; });
+  var minDP = results.reduce(function(a, b){ return a.totalLoss < b.totalLoss ? a : b; });
+  var ratio = minDP.totalLoss === 0 ? Infinity : maxDP.totalLoss / minDP.totalLoss;
+  html += '<br><strong>最不利管段：</strong>' + maxDP.name + '（总阻力 ' + maxDP.totalLoss.toFixed(0) + ' Pa）<br>';
+  html += '<strong>最有利管段：</strong>' + minDP.name + '（总阻力 ' + minDP.totalLoss.toFixed(0) + ' Pa）<br>';
+  html += '<strong>最大/最小阻力比：</strong>' + (ratio === Infinity ? '∞' : ratio.toFixed(2)) + '<br>';
+  if (ratio > 1.5) {
+    html += '<br>⚠️ <strong>阻力比超过 1.5，必须装平衡阀</strong>调节。建议在最不利管段以外的所有支路装手动平衡阀，调至设计流量。<br>';
+  } else if (ratio > 1.15) {
+    html += '<br>⚠️ <strong>阻力比 1.15~1.5，建议装平衡阀</strong>（异程式必须装）。<br>';
+  } else {
+    html += '<br>✅ <strong>阻力比 ≤1.15，水力工况良好</strong>。同程式系统可不用平衡阀，异程式仍建议装动态流量平衡阀。<br>';
+  }
+  // 各管段阀门选型
+  html += '<br><strong>各管段阀门选型（按流速+管径推荐）：</strong></strong><br>';
+  html += '<div style="overflow-x:auto;margin-top:8px;"><table class="result-table" style="font-size:14px;"><thead><tr><th>管段</th><th>DN</th><th>流量 (kg/h)</th><th>推荐阀门</th><th>调节建议</th></tr></thead><tbody>';
+  results.forEach(function(r){
+    var dn = r.dn;
+    var valve, advice;
+    if (dn <= 15) {
+      valve = '散热器温控阀 DN15';
+      advice = '户用末端自动调节，无需手动';
+    } else if (dn <= 25) {
+      valve = '手动调节阀 DN' + dn + ' 或动态平衡阀';
+      advice = '关闭 1~3 圈达到设计流量';
+    } else if (dn <= 50) {
+      valve = '静态平衡阀 DN' + dn + '（带测压嘴）';
+      advice = '调试时测压嘴压差≥3 kPa';
+    } else if (dn <= 100) {
+      valve = '蝶阀 DN' + dn + ' 或动态流量平衡阀';
+      advice = '主干管用蝶阀，支路用动态平衡阀';
+    } else {
+      valve = '蝶阀 DN' + dn + '（主干管关断用）';
+      advice = '不参与水力平衡，仅做关断';
+    }
+    // 失调判断
+    if (r.velocity < 0.2) advice += ' ⚠️流速偏低';
+    else if (r.velocity > 1.5) advice += ' ⚠️流速过高';
+    html += '<tr><td>' + r.name + '</td><td>DN' + dn + '</td><td>' + r.flow.toFixed(0) + '</td><td>' + valve + '</td><td>' + advice + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  // 选泵指导
+  var totalLoad = results.reduce(function(s, r){ return s + r.load; }, 0);
+  var totalFlow = results.reduce(function(s, r){ return s + r.flow; }, 0);
+  var totalDP = maxDP.totalLoss * 1.2; // 安全系数 1.2
+  html += '<br><strong>🔧 水泵选型建议：</strong><br>';
+  html += '• 设计流量：<strong>' + totalFlow.toFixed(0) + ' kg/h</strong>（≈ ' + (totalFlow/977.8*3600/1000).toFixed(1) + ' L/s）<br>';
+  html += '• 设计扬程：<strong>' + totalDP.toFixed(0) + ' Pa</strong>（最不利环路阻力 × 1.2 安全系数）<br>';
+  html += '• 推荐变频泵，型号扬程按上述值向上选一档<br>';
+  // 调节方式
+  html += '<br><strong>📊 推荐调节方式：</strong><br>';
+  if (ratio > 1.5) {
+    html += '异程式 + 阻力比大 → <strong>量调节 + 平衡阀预调</strong>（推荐）。先用平衡阀把所有支路调到设计流量，再用量调节（变频泵）整体降流量<br>';
+  } else {
+    html += '同程式 + 阻力比小 → <strong>质调节 + 量调节复合</strong>（推荐）。优先调供水温度（节能），负荷变化大时再调流量<br>';
+  }
+  html += '</div>';
+  document.getElementById('valveGuidance').innerHTML = html;
+}
+
+// ====== 偏导数对比：机械 vs 重力循环 ======
+function renderCirculationCompare() { runCirculationCompare(); }
+function runCirculationCompare() {
+  var N = parseInt(document.getElementById('cmpFloors').value) || 6;
+  var floorH = parseFloat(document.getElementById('cmpFloorH').value) || 3;
+  var Hp = parseFloat(document.getElementById('cmpHp').value) || 0;
+  var S = parseFloat(document.getElementById('cmpS').value) || 0.05;
+  var DT = parseFloat(document.getElementById('cmpDT').value) || 25;
+  var Drho = parseFloat(document.getElementById('cmpDrho').value) || 6;
+  // 设计流量（按热负荷估算，单位转换：1 kW 时 Q=860 kg/h, 25°C 温差；这里直接给一个参考量）
+  var G_design = Math.sqrt((Hp + N * floorH * 9.81 * Drho / 2) / S); // 顶层作为参考
+  if (!isFinite(G_design) || isNaN(G_design)) G_design = 100;
+  // 各支路计算
+  var rows = [];
+  for (var i = 1; i <= N; i++) {
+    var hi = (i - 1) * floorH; // 1F 为底层，h=0
+    var Hg = G_ACC * hi * Drho;
+    // 机械循环
+    var Htot_M = Hp + Hg;
+    var GM = (Htot_M > 0) ? Math.sqrt(Htot_M / S) : 0;
+    var sigmaM = G_design > 0 ? (GM - G_design) / G_design * 100 : 0;
+    var dGdHp_M = (Htot_M > 0 && GM > 0) ? 1 / (2 * GM) : 0;
+    // 重力循环
+    var Htot_G = Hg;
+    var GG = (Htot_G > 0) ? Math.sqrt(Htot_G / S) : 0;
+    var sigmaG = G_design > 0 ? (GG - G_design) / G_design * 100 : 0;
+    var dGdHg_G = (Htot_G > 0 && GG > 0) ? 1 / (2 * GG) : 0;
+    // 偏导数 σ 对 Q（简化：∂H_g/∂Q ≈ Hg/Q, 这里按 ΔT 与 Q 的关系估算）
+    // 实际：∂Hg/∂Q = g·h·∂Δρ/∂Q；Δρ ∝ DT；DT = Q/(c_p·G)；所以 ∂Δρ/∂Q ≈ Δρ/Q
+    var dHg_dQ_M = (G_design > 0) ? Hg / (G_design * CP * 1000 / 3600) * Drho / DT : 0;
+    var dHg_dQ_G = dHg_dQ_M;
+    var dsigma_dQ_M = (G_design > 0 && GM > 0) ? dGdHp_M * dHg_dQ_M / G_design * 1e4 : 0;
+    var dsigma_dQ_G = (G_design > 0 && GG > 0) ? dGdHg_G * dHg_dQ_G / G_design * 1e4 : 0;
+    rows.push({floor: i, h: hi, Hg: Hg, Gd: G_design, GM: GM, GG: GG, sigmaM: sigmaM, sigmaG: sigmaG, dGdHp_M: dGdHp_M, dGdHg_G: dGdHg_G, dsigmaM: dsigmaM, dsigmaG: dsigmaG});
+  }
+  // 流量表
+  var flowHTML = '';
+  rows.forEach(function(r){
+    flowHTML += '<tr><td>' + r.floor + 'F</td><td>' + r.h.toFixed(1) + '</td><td>' + r.Hg.toFixed(1) + '</td><td>' + r.Gd.toFixed(0) + '</td><td>' + r.GM.toFixed(1) + '</td><td>' + r.GG.toFixed(1) + '</td><td class="' + (Math.abs(r.sigmaM) > 5 ? 'highlight' : '') + '">' + r.sigmaM.toFixed(2) + '</td><td class="' + (Math.abs(r.sigmaG) > 5 ? 'highlight' : '') + '">' + r.sigmaG.toFixed(2) + '</td></tr>';
+  });
+  document.getElementById('cmpFlowBody').innerHTML = flowHTML;
+  // 失调度 Σ
+  var sumSqM = rows.reduce(function(s, r){ return s + Math.pow(r.sigmaM, 2); }, 0);
+  var sumSqG = rows.reduce(function(s, r){ return s + Math.pow(r.sigmaG, 2); }, 0);
+  var sigmaM = Math.sqrt(sumSqM / rows.length);
+  var sigmaG = Math.sqrt(sumSqG / rows.length);
+  var ratio = sigmaG / (sigmaM || 0.001);
+  document.getElementById('cmpSummary').innerHTML =
+    '<div class="summary-item"><div class="value">' + sigmaM.toFixed(2) + '%</div><div class="label">机械循环失调度 Σ<sub>M</sub></div></div>' +
+    '<div class="summary-item"><div class="value">' + sigmaG.toFixed(2) + '%</div><div class="label">重力循环失调度 Σ<sub>G</sub></div></div>' +
+    '<div class="summary-item"><div class="value">' + ratio.toFixed(1) + '×</div><div class="label">重力是机械的 ' + ratio.toFixed(1) + ' 倍</div></div>' +
+    '<div class="summary-item"><div class="value">' + N + '</div><div class="label">层数</div></div>' +
+    '<div class="summary-item"><div class="value">' + (N * floorH * 9.81 * Drho).toFixed(0) + '</div><div class="label">顶层自然压头 (Pa)</div></div>';
+  // 偏导数表
+  var derivHTML = '';
+  rows.forEach(function(r){
+    derivHTML += '<tr><td>' + r.floor + 'F</td><td>' + r.dGdHp_M.toFixed(4) + '</td><td>' + r.dGdHg_G.toFixed(4) + '</td><td>' + r.dsigmaM.toFixed(2) + '</td><td>' + r.dsigmaG.toFixed(2) + '</td></tr>';
+  });
+  document.getElementById('cmpDerivBody').innerHTML = derivHTML;
+  // 结论
+  var concl = '<div class="note"><strong>📊 量化结论：</strong><br><br>';
+  concl += '<strong>（1）失调率比较：</strong>当前参数下，<strong>机械循环失调度 Σ<sub>M</sub>=' + sigmaM.toFixed(2) + '%</strong>，<strong>重力循环失调度 Σ<sub>G</sub>=' + sigmaG.toFixed(2) + '%</strong>，';
+  if (sigmaM < 5 && sigmaG > 15) {
+    concl += '<strong>机械循环远不易失调（差异 ' + ratio.toFixed(1) + ' 倍）</strong>。水泵压头 H<sub>p</sub>=' + Hp + ' Pa 完全压制了自然压头差异（顶层仅 ' + (N * floorH * 9.81 * Drho).toFixed(0) + ' Pa）。<br>';
+  } else if (sigmaM < 15) {
+    concl += '两者差异 ' + ratio.toFixed(1) + ' 倍。建议增加水泵压头或减小支路阻力系数 S。<br>';
+  } else {
+    concl += '<strong>警告：</strong>机械循环失调度已超过 15%，可能因水泵压头 H<sub>p</sub> 选型过小（' + Hp + ' Pa）或支路阻力 S 过大。<br>';
+  }
+  concl += '<br><strong>（2）偏导数灵敏度：</strong>∂σ/∂Q 反映"热负荷变化引起的失调率变化率"。重力循环该值比机械循环<strong>高 ' + ratio.toFixed(1) + ' 倍</strong>，即质调节时重力循环失调是机械循环的 ' + ratio.toFixed(1) + ' 倍。<br>';
+  concl += '<br><strong>（3）何时机械不如重力：</strong>';
+  if (Hp < N * floorH * 9.81 * Drho) {
+    concl += '<strong>当前 H<sub>p</sub>=' + Hp + ' Pa 小于顶层自然压头 ' + (N * floorH * 9.81 * Drho).toFixed(0) + ' Pa</strong>，属于"机械循环的反向劣势场景"——水泵压头不够"压制"自然压头。建议：①加大水泵选型；②改用同程系统；③改用单管系统；④增加分集水器平衡阀。<br>';
+  } else {
+    concl += '当前 H<sub>p</sub>=' + Hp + ' Pa 远大于顶层自然压头 ' + (N * floorH * 9.81 * Drho).toFixed(0) + ' Pa，机械循环工况良好。<br>';
+  }
+  concl += '<br><strong>💡 工程建议：</strong>本系统推荐使用<strong>机械循环 + 同程式</strong>。若需冗余设计，可加装重力循环应急管路（停电时启用）。</div>';
+  document.getElementById('cmpConclusion').innerHTML = concl;
+}
+function exportResult() { var ra=document.getElementById('resultArea'); if(ra.style.display==='none'){alert('请先进行计算！');return;} var csv='管段名称,热负荷(W),流量(kg/h),温降(°C),管径DN,内径(mm),流速(m/s),比摩阻(Pa/m),沿程阻力(Pa),局部阻力(Pa),总阻力(Pa)\n'; document.querySelectorAll('#resultBody tr').forEach(function(row){ csv+=Array.from(row.querySelectorAll('td')).map(function(c){return c.textContent.trim();}).join(',')+'\n'; }); var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a'); a.href=url;a.download='不等温降法水力计算结果.csv'; a.click(); URL.revokeObjectURL(url); }
+function resetAll() { if(!confirm('确定要重置全部数据吗？'))return; document.getElementById('tg').value=95; document.getElementById('th').value=70; document.getElementById('roughness').value=0.2; document.getElementById('density').value=977.8; document.getElementById('sectionBody').innerHTML=''; sectionCount=0;selectedPipeIndex={}; updateTotalLoad();toggleEmpty(); document.getElementById('resultArea').style.display='none'; document.getElementById('pipeRefCard').style.display='none'; }
+window.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
